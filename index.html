@@ -33,6 +33,22 @@ window.FUNNEL_CONFIG = {
   // Optional: GA4 measurement ID, e.g. "G-XXXXXXX". Leave "" to skip.
   ga4Id: "",
 
+  // ---- VIDEO ----------------------------------------------------------
+  // Leave "" to show the placeholder.
+  //   Self-hosted:  "video.mp4"   (upload the file next to index.html)
+  //   Vimeo:        "https://player.vimeo.com/video/123456789"
+  //   YouTube:      "https://www.youtube.com/embed/XXXXXXXXXXX"
+  videoUrl: "",
+
+  // Optional still image shown before playback, e.g. "poster.jpg"
+  videoPoster: "",
+
+  // "sound"  = try to autoplay with sound, fall back to muted + a tap-for-sound
+  //            button when the browser blocks it (which it usually will)
+  // "muted"  = autoplay silently
+  // "off"    = show a play button, do nothing until clicked
+  videoAutoplay: "sound",
+
   // The Initial Consultation event now asks only Name, Email and Phone number.
   // Phone is its first (and only) custom question, so Calendly's "a1" param fills it.
   // Leave true so nobody has to type their number twice.
@@ -119,6 +135,20 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .video-placeholder:hover .play{transform:scale(1.06)}
 .play svg{width:26px;height:26px;margin-left:4px;fill:#fff}
 .video-placeholder p{margin:0;font-size:13px;opacity:.75;max-width:34ch}
+.video-frame video,.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover;background:#0b1a10}
+/* tap-for-sound prompt, shown only when the browser blocks audible autoplay */
+.sound-cta{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  display:none;align-items:center;gap:9px;
+  background:rgba(0,0,0,.72);color:#fff;border:0;border-radius:99px;
+  padding:11px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;
+  backdrop-filter:blur(6px);z-index:3;white-space:nowrap;
+  animation:pulseIn .4s ease both;
+}
+.sound-cta.show{display:flex}
+.sound-cta:hover{background:#000}
+.sound-cta svg{width:17px;height:17px;fill:#fff;flex:none}
+@keyframes pulseIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 
 .eyebrow{
   color:#bff3d2;font-weight:700;font-size:13px;letter-spacing:.14em;
@@ -711,9 +741,87 @@ document.getElementById('backBtn').addEventListener('click', () => {
   if (idx === 0) { show('vsl'); } else { idx--; renderQuestion(); }
 });
 
-/* placeholder video click — remove once a real embed is in */
-const vp = document.getElementById('videoPlaceholder');
-if (vp) vp.addEventListener('click', () => track('video_play_placeholder', {}));
+/* ---------- video ----------
+   Handles three cases: no video (placeholder), a self-hosted mp4, or an
+   iframe embed. Audible autoplay is attempted when asked for, with a
+   graceful fall back to muted + a tap-for-sound button. */
+(function setupVideo(){
+  const frame = document.querySelector('.video-frame');
+  const vp = document.getElementById('videoPlaceholder');
+  const url = (CFG.videoUrl || '').trim();
+
+  if (!url) {
+    if (vp) vp.addEventListener('click', () => track('video_play_placeholder', {}));
+    return;
+  }
+
+  const isFile = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+  const mode = CFG.videoAutoplay || 'sound';
+  if (vp) vp.remove();
+
+  if (!isFile) {
+    /* ---- iframe embed (Vimeo / YouTube / Loom) ---- */
+    const u = new URL(url, location.href);
+    if (mode !== 'off') {
+      u.searchParams.set('autoplay', '1');
+      if (/youtube|youtu\.be/.test(u.hostname)) u.searchParams.set('mute', '1');
+      else u.searchParams.set('muted', '1');
+    }
+    u.searchParams.set('playsinline', '1');
+    const f = document.createElement('iframe');
+    f.src = u.toString();
+    f.allow = 'autoplay; fullscreen; picture-in-picture';
+    f.setAttribute('allowfullscreen', '');
+    f.setAttribute('title', 'Expand Accounts introduction');
+    frame.appendChild(f);
+    track('video_loaded', { type: 'embed' });
+    return;
+  }
+
+  /* ---- self-hosted file ---- */
+  const v = document.createElement('video');
+  v.src = url;
+  v.setAttribute('playsinline', '');
+  v.playsInline = true;
+  v.controls = true;
+  v.preload = 'metadata';
+  if (CFG.videoPoster) v.poster = CFG.videoPoster;
+  frame.appendChild(v);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'sound-cta';
+  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a6.8 6.8 0 0 1 0 13.4v2.1a8.9 8.9 0 0 0 0-17.6z"/></svg><span>Tap for sound</span>';
+  frame.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    v.muted = false;
+    v.volume = 1;
+    v.play().catch(function(){});
+    btn.classList.remove('show');
+    track('video_unmuted', {});
+  });
+
+  if (mode === 'off') return;
+
+  /* Try audible first. Browsers block this unless the visitor has history
+     with the domain, so fall back to muted and ask for the tap. */
+  if (mode === 'sound') {
+    v.muted = false;
+    v.play().then(() => {
+      track('video_autoplay', { sound: true });
+    }).catch(() => {
+      v.muted = true;
+      v.play().then(() => {
+        btn.classList.add('show');
+        track('video_autoplay', { sound: false });
+      }).catch(() => { /* autoplay refused entirely; controls are there */ });
+    });
+  } else {
+    v.muted = true;
+    v.play().then(() => btn.classList.add('show')).catch(function(){});
+  }
+})();
 
 /* ---------- form ---------- */
 const form = document.getElementById('leadForm');
