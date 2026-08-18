@@ -43,11 +43,12 @@ window.FUNNEL_CONFIG = {
   // Optional still image shown before playback, e.g. "poster.jpg"
   videoPoster: "",
 
-  // "sound"  = try to autoplay with sound, fall back to muted + a tap-for-sound
-  //            button when the browser blocks it (which it usually will)
-  // "muted"  = autoplay silently
-  // "off"    = show a play button, do nothing until clicked
-  videoAutoplay: "sound",
+  // "off"    = branded play button, starts WITH SOUND on click (recommended:
+  //            a click is a user gesture, so audio is always allowed)
+  // "muted"  = autoplay silently, with a tap-for-sound button
+  // "sound"  = try audible autoplay, fall back to muted + tap-for-sound
+  //            (browsers block audible autoplay for first-time visitors)
+  videoAutoplay: "off",
 
   // The Initial Consultation event now asks only Name, Email and Phone number.
   // Phone is its first (and only) custom question, so Calendly's "a1" param fills it.
@@ -146,6 +147,15 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
   animation:pulseIn .4s ease both;
 }
 .sound-cta.show{display:flex}
+/* branded click-to-play overlay */
+.play-overlay{
+  position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;
+  background:rgba(6,20,11,.34);cursor:pointer;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.play-overlay:hover{background:rgba(6,20,11,.18)}
+.play-overlay:hover .play{transform:scale(1.06)}
 .sound-cta:hover{background:#000}
 .sound-cta svg{width:17px;height:17px;fill:#fff;flex:none}
 @keyframes pulseIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -788,6 +798,26 @@ document.getElementById('backBtn').addEventListener('click', () => {
   if (CFG.videoPoster) v.poster = CFG.videoPoster;
   frame.appendChild(v);
 
+  /* Click-to-play: keep the branded play button rather than a bare player. */
+  if (mode === 'off') {
+    v.controls = false;
+    const over = document.createElement('button');
+    over.type = 'button';
+    over.className = 'play-overlay';
+    over.setAttribute('aria-label', 'Play video');
+    over.innerHTML = '<span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+    frame.appendChild(over);
+    over.addEventListener('click', () => {
+      v.controls = true;
+      v.muted = false;
+      v.volume = 1;
+      v.play().catch(() => { v.muted = true; v.play().catch(function(){}); });
+      over.remove();
+      track('video_play', { trigger: 'click' });
+    });
+    return;
+  }
+
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'sound-cta';
@@ -801,8 +831,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
     btn.classList.remove('show');
     track('video_unmuted', {});
   });
-
-  if (mode === 'off') return;
 
   /* Try audible first. Browsers block this unless the visitor has history
      with the domain, so fall back to muted and ask for the tap. */
