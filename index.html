@@ -784,7 +784,9 @@ form.addEventListener('submit', function(e){
       phone: phone,
       phone_e164: toE164UK(phone),
       email: email,
-      source: 'LinkedIn thought leader ad funnel',
+      source: (tracking.utm_source
+                 ? tracking.utm_source + (tracking.utm_medium ? ' / ' + tracking.utm_medium : '')
+                 : (tracking.referrer && tracking.referrer !== 'direct' ? tracking.referrer : 'direct')),
       submitted_at: new Date().toISOString(),
       answers_summary: summary,
       booking_started: true,
