@@ -22,9 +22,9 @@ window.FUNNEL_CONFIG = {
   // qualifying, so Calendly should only be asked to pick a time.
   bookingUrl: "https://calendly.com/expandaccounts/30min",
 
-  // Optional: a Make/Zapier/Formspree webhook to also receive the lead + answers.
-  // Leave "" to skip. Nothing breaks either way — the redirect still happens.
-  leadWebhook: "",
+  // Google Apps Script web app. Receives every completed form, whether or not
+  // they go on to book. Writes a row to the "Funnel Leads" sheet and emails you.
+  leadWebhook: "https://script.google.com/macros/s/AKfycbxexsJZ_7fjNQZgeqvNc5Be76G0Hl7h43Jzb0Y5hOB7xkioTvvQuGr8tfFJaux1BSJKNg/exec",
 
   // LinkedIn conversion ID (Campaign Manager > Conversions). Fires on form submit.
   // Partner/Insight Tag id is 8370186 and sits at the bottom of this file.
