@@ -42,7 +42,7 @@ window.FUNNEL_CONFIG = {
   videoUrl: "video.mp4",
 
   // Optional still image shown before playback, e.g. "poster.jpg"
-  videoPoster: "",
+  videoPoster: "poster.jpg",
 
   // "off"    = branded play button, starts WITH SOUND on click (recommended:
   //            a click is a user gesture, so audio is always allowed)
@@ -151,11 +151,12 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 /* branded click-to-play overlay */
 .play-overlay{
   position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;
-  background:rgba(6,20,11,.34);cursor:pointer;z-index:2;
+  background:radial-gradient(circle at 50% 50%, rgba(6,20,11,.42) 0%, rgba(6,20,11,.16) 60%);
+  cursor:pointer;z-index:2;
   display:flex;align-items:center;justify-content:center;
   transition:background .2s;
 }
-.play-overlay:hover{background:rgba(6,20,11,.18)}
+.play-overlay:hover{background:radial-gradient(circle at 50% 50%, rgba(6,20,11,.30) 0%, rgba(6,20,11,.06) 60%)}
 .play-overlay:hover .play{transform:scale(1.06)}
 .sound-cta:hover{background:#000}
 .sound-cta svg{width:17px;height:17px;fill:#fff;flex:none}
