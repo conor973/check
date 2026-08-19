@@ -36,9 +36,10 @@ window.FUNNEL_CONFIG = {
   // ---- VIDEO ----------------------------------------------------------
   // Leave "" to show the placeholder.
   //   Self-hosted:  "video.mp4"   (upload the file next to index.html)
+  //   If the file isn't there yet the page quietly shows the placeholder.
   //   Vimeo:        "https://player.vimeo.com/video/123456789"
   //   YouTube:      "https://www.youtube.com/embed/XXXXXXXXXXX"
-  videoUrl: "",
+  videoUrl: "video.mp4",
 
   // Optional still image shown before playback, e.g. "poster.jpg"
   videoPoster: "",
@@ -767,7 +768,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
 
   const isFile = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
   const mode = CFG.videoAutoplay || 'sound';
-  if (vp) vp.remove();
+  if (vp) vp.style.display = 'none';   // hidden, not removed - we may need it back
 
   if (!isFile) {
     /* ---- iframe embed (Vimeo / YouTube / Loom) ---- */
@@ -796,6 +797,17 @@ document.getElementById('backBtn').addEventListener('click', () => {
   v.controls = true;
   v.preload = 'metadata';
   if (CFG.videoPoster) v.poster = CFG.videoPoster;
+
+  /* If the file isn't uploaded yet (or 404s), fall back to the placeholder
+     rather than showing a dead black box. */
+  v.addEventListener('error', function(){
+    v.remove();
+    const ov = frame.querySelector('.play-overlay'); if (ov) ov.remove();
+    const sc = frame.querySelector('.sound-cta');    if (sc) sc.remove();
+    if (vp) vp.style.display = '';
+    track('video_missing', { url: url });
+  });
+
   frame.appendChild(v);
 
   /* Click-to-play: keep the branded play button rather than a bare player. */
