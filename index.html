@@ -278,6 +278,9 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .consent{display:flex;gap:11px;align-items:flex-start;margin:6px 0 18px;font-size:13px;color:var(--muted)}
 .consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--green);flex:none}
 .consent a{color:var(--green)}
+.consent.invalid{outline:2px solid #c62828;outline-offset:7px;border-radius:6px}
+.consent-err{color:#c62828;font-size:13px;font-weight:600;margin:-8px 0 16px;display:none}
+.consent-err.show{display:block}
 .submit{
   width:100%;border:0;border-radius:99px;background:var(--green);color:#fff;
   font-family:"Varela Round",sans-serif;font-size:clamp(17px,4.4vw,20px);
@@ -416,10 +419,11 @@ footer a{color:#cdeed9}
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@yourcompany.co.uk" required>
         <div class="err">Please enter a valid email address.</div>
       </div>
-      <label class="consent">
+      <label class="consent" id="f-consent">
         <input type="checkbox" id="consent" required>
         <span>I'm happy for Expand Accounts to contact me about my enquiry.</span>
       </label>
+      <div class="consent-err" id="consentErr">Please tick the box above so we can get back to you.</div>
       <button class="submit" type="submit" id="submitBtn">Choose Time Slot For A Call</button>
       <p class="after-form">Takes you straight to the booking calendar. No obligation, no sales script.</p>
     </form>
@@ -880,6 +884,11 @@ function invalid(id, bad){
   input.addEventListener('input', () => document.getElementById(pair[1]).classList.remove('invalid'));
 });
 
+document.getElementById('consent').addEventListener('change', function () {
+  document.getElementById('f-consent').classList.remove('invalid');
+  document.getElementById('consentErr').classList.remove('show');
+});
+
 /* Calendly's phone field wants international format. "07123 456789" -> "+447123456789" */
 function toE164UK(raw){
   const s = String(raw || '').trim();
@@ -917,8 +926,20 @@ form.addEventListener('submit', function(e){
   bad = invalid('f-name',  name.length < 2) || bad;
   bad = invalid('f-phone', phone.replace(/[^\d]/g,'').length < 10) || bad;
   bad = invalid('f-email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) || bad;
-  if (!ok) { document.getElementById('consent').focus(); bad = true; }
-  if (bad) return;
+  const consentRow = document.getElementById('f-consent');
+  const consentErr = document.getElementById('consentErr');
+  consentRow.classList.toggle('invalid', !ok);
+  consentErr.classList.toggle('show', !ok);
+  if (!ok) bad = true;
+
+  if (bad) {
+    /* Make the failure visible - otherwise the button looks broken and people leave */
+    const firstBad = document.querySelector('.field.invalid, .consent.invalid');
+    if (firstBad && firstBad.scrollIntoView) {
+      firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
 
   submitBtn.disabled = true;
   submitBtn.textContent = 'One moment…';
