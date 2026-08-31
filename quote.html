@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instant Price | Expand Accounts</title>
+<meta name="description" content="Specialist construction accountants. Take the 60-second check to see if we're the right fit for your CIS, VAT and tax.">
+<meta property="og:title" content="Are you overpaying tax and chasing your accountant?">
+<meta property="og:description" content="Take the 60-second check and see what a construction specialist would do differently with your numbers.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Montserrat:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     CONFIG — edit these five lines and nothing else
+     ============================================================ -->
+<script>
+window.FUNNEL_CONFIG = {
+  // Where a completed form sends the person. Name + email are pre-filled.
+  // This is the DIRECT event link, not the /d/ routing form: the quiz does the
+  // qualifying, so Calendly should only be asked to pick a time.
+  bookingUrl: "https://calendly.com/expandaccounts/30min",
+
+  // Google Apps Script web app. Receives every completed form, whether or not
+  // they go on to book. Writes a row to the "Funnel Leads" sheet and emails you.
+  leadWebhook: "https://script.google.com/macros/s/AKfycbxexsJZ_7fjNQZgeqvNc5Be76G0Hl7h43Jzb0Y5hOB7xkioTvvQuGr8tfFJaux1BSJKNg/exec",
+
+  // LinkedIn conversion ID (Campaign Manager > Conversions). Fires on form submit.
+  // Partner/Insight Tag id is 8370186 and sits at the bottom of this file.
+  linkedInConversionId: 29578538,
+
+  // Optional: GA4 measurement ID, e.g. "G-XXXXXXX". Leave "" to skip.
+  ga4Id: "",
+
+  // ---- VIDEO ----------------------------------------------------------
+  // Leave "" to show the placeholder.
+  //   Self-hosted:  "video.mp4"   (upload the file next to index.html)
+  //   If the file isn't there yet the page quietly shows the placeholder.
+  //   Vimeo:        "https://player.vimeo.com/video/123456789"
+  //   YouTube:      "https://www.youtube.com/embed/XXXXXXXXXXX"
+  videoUrl: "quote-video.mp4",
+
+  // Optional still image shown before playback, e.g. "poster.jpg"
+  videoPoster: "quote-poster.jpg",
+
+  // "off"    = branded play button, starts WITH SOUND on click (recommended:
+  //            a click is a user gesture, so audio is always allowed)
+  // "muted"  = autoplay silently, with a tap-for-sound button
+  // "sound"  = try audible autoplay, fall back to muted + tap-for-sound
+  //            (browsers block audible autoplay for first-time visitors)
+  videoAutoplay: "off",
+
+  // The Initial Consultation event now asks only Name, Email and Phone number.
+  // Phone is its first (and only) custom question, so Calendly's "a1" param fills it.
+  // Leave true so nobody has to type their number twice.
+  prefillPhoneToCalendly: true
+};
+</script>
+
+<style>
+:root{
+  --green:#00BC5B;
+  --green-dark:#00A34F;
+  --deep:#14401d;
+  --deep-2:#0d2c14;
+  --leaf:#5cb85c;
+  --ink:#1f2a24;
+  --muted:#5d6b62;
+  --line:#e4ebe6;
+  --bg:#f4f8f5;
+  --card:#ffffff;
+  --radius:16px;
+  --shadow:0 10px 30px rgba(16,42,26,.10);
+  --shadow-lg:0 18px 50px rgba(16,42,26,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%}
+body{
+  display:flex;flex-direction:column;min-height:100vh;
+  font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.55;
+}
+h1,h2,h3,.brandfont{font-family:"Varela Round",Montserrat,sans-serif;font-weight:400;letter-spacing:-.01em}
+img{max-width:100%;display:block}
+
+/* ---------- header ---------- */
+/* Logo fills the banner's full height; width follows its own aspect ratio */
+.site-header{
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:0;text-align:center;
+  height:92px;display:flex;align-items:center;justify-content:center;
+}
+.site-header img{height:100%;width:auto;margin:0 auto;object-fit:contain}
+.site-header .wordmark{font-family:"Varela Round",sans-serif;font-size:22px;color:var(--deep)}
+.site-header .wordmark b{color:var(--green)}
+
+/* ---------- shared shell ---------- */
+main{flex:1 0 auto;display:flex;flex-direction:column}
+.shell{max-width:760px;margin:0 auto;padding:0 18px}
+.screen{display:none}
+.screen.active{flex:1 0 auto}
+.screen.active{display:block;animation:fade .32s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- VSL screen ---------- */
+.hero{
+  background:linear-gradient(150deg,var(--leaf) 0%, #2e7d3a 45%, var(--deep) 100%);
+  padding:34px 0 46px;
+  position:relative;
+}
+.hero:after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:46px;
+  background:var(--bg);
+  clip-path:ellipse(75% 100% at 50% 100%);
+}
+.video-frame{
+  background:#0b1a10;border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow-lg);
+  aspect-ratio:16/9;position:relative;
+}
+/* --- VIDEO SLOT: replace everything inside .video-frame with your embed --- */
+.video-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+  background:radial-gradient(circle at 50% 40%,#1d4a2a,#0b1a10);
+  color:#dff3e5;text-align:center;padding:20px;
+}
+.play{
+  width:74px;height:74px;border-radius:50%;
+  background:var(--green);display:grid;place-items:center;
+  box-shadow:0 0 0 10px rgba(0,188,91,.22);
+  transition:transform .2s;
+}
+.video-placeholder:hover .play{transform:scale(1.06)}
+.play svg{width:26px;height:26px;margin-left:4px;fill:#fff}
+.video-placeholder p{margin:0;font-size:13px;opacity:.75;max-width:34ch}
+.video-frame video,.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover;background:#0b1a10}
+/* tap-for-sound prompt, shown only when the browser blocks audible autoplay */
+.sound-cta{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  display:none;align-items:center;gap:9px;
+  background:rgba(0,0,0,.72);color:#fff;border:0;border-radius:99px;
+  padding:11px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;
+  backdrop-filter:blur(6px);z-index:3;white-space:nowrap;
+  animation:pulseIn .4s ease both;
+}
+.sound-cta.show{display:flex}
+/* branded click-to-play overlay */
+.play-overlay{
+  position:absolute;inset:0;width:100%;height:100%;border:0;padding:0 0 11% 0;
+  /* darken low and to the edges so the face stays clear and bright */
+  background:linear-gradient(to bottom, rgba(6,20,11,.10) 0%, rgba(6,20,11,.12) 45%, rgba(6,20,11,.52) 100%);
+  cursor:pointer;z-index:2;
+  display:flex;align-items:flex-end;justify-content:center;
+  transition:background .2s;
+}
+.play-overlay:hover{background:linear-gradient(to bottom, rgba(6,20,11,.04) 0%, rgba(6,20,11,.06) 45%, rgba(6,20,11,.44) 100%)}
+.play-overlay:hover .play{transform:scale(1.06)}
+.sound-cta:hover{background:#000}
+.sound-cta svg{width:17px;height:17px;fill:#fff;flex:none}
+@keyframes pulseIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.eyebrow{
+  color:#bff3d2;font-weight:700;font-size:13px;letter-spacing:.14em;
+  text-transform:uppercase;text-align:center;margin:30px 0 10px;
+}
+.hero h1{
+  color:#fff;text-align:center;font-size:clamp(27px,6.4vw,42px);
+  line-height:1.18;margin:34px 0 14px;
+}
+.hero .sub{
+  color:#e2f4e8;text-align:center;font-size:clamp(15px,3.6vw,17.5px);
+  margin:0 auto 26px;max-width:44ch;
+}
+.cta-box{
+  display:block;width:100%;border:2px solid rgba(255,255,255,.55);
+  background:rgba(255,255,255,.06);border-radius:var(--radius);
+  padding:18px 20px;text-align:center;cursor:pointer;
+  transition:background .2s,border-color .2s,transform .12s;
+  font-family:inherit;color:#fff;
+}
+.cta-box:hover{background:#fff;border-color:#fff}
+.cta-box:hover .cta-main,.cta-box:hover .cta-sub{color:var(--deep)}
+.cta-box:active{transform:translateY(1px)}
+.cta-main{display:block;font-family:"Varela Round",sans-serif;font-size:clamp(19px,4.6vw,24px);color:#fff}
+.cta-sub{display:block;font-size:13.5px;color:#cdeed9;margin-top:4px;font-weight:500}
+
+.trust{
+  display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;
+  margin:26px auto 0;color:#cdeed9;font-size:12.5px;font-weight:600;
+}
+.trust span{display:flex;align-items:center;gap:7px}
+.trust svg{width:14px;height:14px;fill:#7fe3a5;flex:none}
+
+/* ---------- quiz ---------- */
+.quiz-wrap{padding:34px 0 60px;min-height:70vh}
+.progress{
+  height:6px;background:#e2ebe5;border-radius:99px;overflow:hidden;
+  max-width:760px;margin:0 auto 8px;
+}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--leaf),var(--green));border-radius:99px;transition:width .35s ease}
+.step-count{text-align:center;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.06em;margin-bottom:26px}
+.q{
+  font-size:clamp(23px,5.6vw,34px);text-align:center;color:var(--deep);
+  margin:0 0 8px;line-height:1.2;
+}
+.q-help{text-align:center;color:var(--muted);font-size:14.5px;margin:0 auto 26px;max-width:40ch}
+/* single column at every width — options always stack */
+.options{display:grid;gap:12px;grid-template-columns:1fr}
+.opt{
+  display:flex;align-items:center;gap:14px;text-align:left;
+  background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:16px 18px;font:inherit;font-size:15.5px;color:var(--ink);
+  cursor:pointer;box-shadow:0 2px 6px rgba(16,42,26,.05);
+  transition:border-color .16s,box-shadow .16s,transform .1s,background .16s;
+  width:100%;
+}
+.opt:hover{border-color:var(--green);box-shadow:var(--shadow);transform:translateY(-1px)}
+.opt.chosen{border-color:var(--green);background:#f0fdf5}
+.tick{
+  flex:none;width:24px;height:24px;border-radius:50%;
+  background:#eaf4ee;display:grid;place-items:center;transition:background .16s;
+}
+.opt:hover .tick,.opt.chosen .tick{background:var(--green)}
+.tick svg{width:13px;height:13px;fill:#b9d3c3;transition:fill .16s}
+.opt:hover .tick svg,.opt.chosen .tick svg{fill:#fff}
+/* live counter for capped multi-select questions */
+.pick-note{
+  text-align:center;font-size:13px;color:var(--muted);font-weight:600;
+  margin:14px 0 0;transition:color .2s;
+}
+.pick-note.full{color:var(--green)}
+.pick-note.over{color:#c62828}
+/* free-text "Other" box + continue button for multi-select questions */
+.other-wrap{display:none;margin:14px 0 0}
+.other-wrap.on{display:block;animation:fade .25s ease both}
+.other-wrap label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:6px}
+.other-wrap textarea{
+  width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+  font:inherit;font-size:16px;background:#fff;color:var(--ink);resize:vertical;
+}
+.other-wrap textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px rgba(0,188,91,.12)}
+.other-wrap .hint{color:#c62828;font-size:12.5px;margin:6px 0 0;display:none}
+.other-wrap.warn .hint{display:block}
+.other-wrap.warn textarea{border-color:#e57373}
+.continue{
+  display:block;width:100%;margin:20px auto 0;border:0;border-radius:99px;
+  background:var(--green);color:#fff;font-family:"Varela Round",sans-serif;
+  font-size:19px;padding:16px;cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,188,91,.32);transition:background .2s,opacity .2s;
+}
+.continue:hover{background:var(--green-dark)}
+.continue[disabled]{opacity:.42;cursor:default;box-shadow:none}
+.back{
+  margin:26px auto 0;display:block;background:none;border:0;
+  color:var(--muted);font:inherit;font-size:13.5px;cursor:pointer;padding:8px;
+}
+.back:hover{color:var(--green);text-decoration:underline}
+
+/* ---------- capture ---------- */
+.capture{padding:34px 0 20px}
+.capture h2{font-size:clamp(24px,5.6vw,34px);text-align:center;color:var(--deep);margin:0 0 6px;line-height:1.2}
+.capture .lead{text-align:center;color:var(--muted);margin:0 auto 26px;max-width:42ch;font-size:15px}
+.form-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 20px 24px;border:1px solid var(--line)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:6px;letter-spacing:.02em}
+.field input{
+  width:100%;padding:15px 16px;border:1.5px solid var(--line);border-radius:12px;
+  font:inherit;font-size:16px;background:#fbfdfb;color:var(--ink);
+}
+.field input:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 4px rgba(0,188,91,.12)}
+.field .err{color:#c62828;font-size:12.5px;margin-top:6px;display:none}
+.field.invalid input{border-color:#e57373}
+.field.invalid .err{display:block}
+.consent{display:flex;gap:11px;align-items:flex-start;margin:6px 0 18px;font-size:13px;color:var(--muted)}
+.consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--green);flex:none}
+.consent a{color:var(--green)}
+.consent.invalid{outline:2px solid #c62828;outline-offset:7px;border-radius:6px}
+.consent-err{color:#c62828;font-size:13px;font-weight:600;margin:-8px 0 16px;display:none}
+.consent-err.show{display:block}
+.submit{
+  width:100%;border:0;border-radius:99px;background:var(--green);color:#fff;
+  font-family:"Varela Round",sans-serif;font-size:clamp(17px,4.4vw,20px);
+  padding:17px 20px;cursor:pointer;line-height:1.25;
+  box-shadow:0 8px 20px rgba(0,188,91,.35);transition:background .2s,transform .1s;
+}
+.submit:hover{background:var(--green-dark)}
+.submit:active{transform:translateY(1px)}
+.submit[disabled]{opacity:.65;cursor:default}
+.after-form{text-align:center;font-size:12.5px;color:var(--muted);margin:14px 0 0}
+
+/* ---------- testimonials ---------- */
+.proof{background:#f2ede3;padding:52px 0 60px;margin-top:34px}
+.proof .shell{max-width:1080px}
+.proof-eyebrow{
+  font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:#3f7a52;
+  margin:0 0 10px;display:flex;align-items:center;gap:9px;
+}
+.proof-eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:#3f7a52;flex:none}
+.proof h3{
+  font-family:Lora,Georgia,serif;font-weight:700;
+  color:#1c3f2c;font-size:clamp(28px,5.4vw,44px);
+  line-height:1.12;margin:0 0 30px;text-align:left;letter-spacing:-.015em;
+}
+.cards{display:grid;gap:22px}
+@media(min-width:820px){.cards{grid-template-columns:repeat(3,1fr)}}
+.pcard{
+  background:#fbf9f5;border-top:3px solid #3f7a52;border-radius:2px;
+  padding:22px 24px 24px;box-shadow:0 10px 26px rgba(40,32,18,.09);
+  display:flex;flex-direction:column;
+}
+.stars{display:flex;gap:3px;margin-bottom:14px}
+.stars svg{width:14px;height:14px;fill:#2f6b43}
+.pcard blockquote{
+  font-family:Lora,Georgia,serif;font-size:16px;line-height:1.55;
+  color:#25382c;margin:0 0 22px;flex:1 0 auto;
+}
+.pcard figcaption{font-family:Montserrat,sans-serif;line-height:1.35}
+.pcard figcaption strong{display:block;font-size:13.5px;font-weight:700;color:#1c3f2c}
+.pcard figcaption span{display:block;font-size:13px;color:#8a8578}
+
+/* ---------- thanks ---------- */
+.thanks{padding:60px 0;text-align:center}
+.thanks .tick-big{width:70px;height:70px;border-radius:50%;background:var(--green);display:grid;place-items:center;margin:0 auto 18px}
+.thanks .tick-big svg{width:30px;height:30px;fill:#fff}
+.thanks h2{color:var(--deep);font-size:28px;margin:0 0 8px}
+.thanks p{color:var(--muted);max-width:38ch;margin:0 auto 22px}
+.thanks a.btn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;border-radius:99px;padding:15px 30px;font-family:"Varela Round",sans-serif;font-size:18px}
+
+footer{background:var(--deep-2);color:#9fc2ab;text-align:center;padding:22px 18px;font-size:12.5px}
+footer a{color:#cdeed9}
+
+/* ---------- instant-price additions ---------- */
+.stepper{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 4px}
+.step-btn{width:58px;height:58px;flex:none;border:1px solid var(--line,#dfe4e0);background:#fff;
+  border-radius:14px;font-size:28px;line-height:1;color:var(--green,#00a851);cursor:pointer;
+  box-shadow:0 1px 2px rgba(16,32,24,.06)}
+.step-btn:hover{background:#f3f8f4}
+.step-btn:active{transform:translateY(1px)}
+.step-val{width:118px;height:58px;text-align:center;font-size:26px;font-weight:700;
+  border:1px solid var(--line,#dfe4e0);border-radius:14px;background:#fff;
+  font-variant-numeric:tabular-nums;color:inherit}
+.step-unit{text-align:center;color:#6b7772;font-size:14px;margin:2px 0 18px}
+
+.price-wrap{text-align:center;padding-top:8px}
+.price-eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;
+  color:#6b7772;margin:0 0 6px}
+.price-big{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:22px}
+.price-big #priceNum{font-size:64px;line-height:1;font-weight:800;letter-spacing:-.02em;
+  color:var(--green-dark,#12492c)}
+.price-per{font-size:15px;color:#6b7772}
+.price-lines{max-width:460px;margin:0 auto 18px;text-align:left;background:#fff;
+  border:1px solid var(--line,#dfe4e0);border-radius:14px;overflow:hidden}
+.price-line{display:flex;justify-content:space-between;gap:14px;padding:13px 17px;
+  border-bottom:1px solid var(--line,#dfe4e0);font-size:15px}
+.price-line:last-child{border-bottom:0}
+.price-line span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+.price-line.total{font-weight:700;background:#f3f8f4}
+.price-note{max-width:460px;margin:0 auto 20px;color:#6b7772;font-size:14px}
+@media (max-width:520px){ .price-big #priceNum{font-size:52px} }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <!-- Swap this for a transparent-background PNG/SVG of the logo when you have one -->
+  <img src="https://expandaccounts.co.uk/wp-content/uploads/2024/11/Screenshot-2025-11-12-at-14.13.56-1024x791.webp"
+       alt="Expand Accounts, Construction Accountants"
+       onerror="this.outerHTML='<div class=\'wordmark\'><b>EXPAND</b> ACCOUNTS</div>'">
+</header>
+
+<main>
+<!-- =========================================================
+     SCREEN 0 — THE VSL
+     ========================================================= -->
+<section class="screen active" id="screen-vsl">
+  <div class="hero">
+    <div class="shell">
+
+      <div class="video-frame">
+        <!-- ===== REPLACE FROM HERE ===== -->
+        <div class="video-placeholder" id="videoPlaceholder" role="button" tabindex="0" aria-label="Play video">
+          <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <p>Your 90-second video goes here. Paste a Vimeo, YouTube or Loom embed in place of this block.</p>
+        </div>
+        <!-- ===== TO HERE =====
+             e.g. <iframe src="https://player.vimeo.com/video/XXXXXX" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        -->
+      </div>
+
+      <h1>Find Out Exactly What Your Accounts Will Cost</h1>
+      <p class="sub">Four quick questions about your business and you'll have a real monthly price. No &quot;it depends&quot;, no waiting for a callback.</p>
+
+      <button class="cta-box" id="startBtn">
+        <span class="cta-main">Get My Price</span>
+        <span class="cta-sub">Takes about 60 seconds</span>
+      </button>
+
+      <div class="trust">
+        <span><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg> Construction-Only Firm</span>
+        <span><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg> Fixed Monthly Fee</span>
+        <span><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg> No Tie-In</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     SCREENS 1-6 — THE QUIZ (built by JS from QUESTIONS below)
+     ========================================================= -->
+<section class="screen" id="screen-quiz">
+  <div class="quiz-wrap">
+    <div class="shell">
+      <div class="progress"><i id="bar"></i></div>
+      <div class="step-count" id="stepCount">QUESTION 1 OF 6</div>
+      <div id="qHost"></div>
+      <button class="back" id="backBtn">&larr; Back</button>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     SCREEN 7 — CAPTURE
+     ========================================================= -->
+<section class="screen" id="screen-capture">
+  <div class="shell capture">
+    <h2>Almost there.<br>Let's see if we're the right fit.</h2>
+    <p class="lead">Pop your details in and you'll go straight to the calendar to pick a time that suits.</p>
+
+    <form class="form-card" id="leadForm" novalidate>
+      <div class="field" id="f-name">
+        <label for="name">Your name</label>
+        <input id="name" name="name" type="text" autocomplete="name" placeholder="First and last name" required>
+        <div class="err">Please enter your name.</div>
+      </div>
+      <div class="field" id="f-phone">
+        <label for="phone">Mobile number</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07123 456789" required>
+        <div class="err">Please enter a valid UK mobile number.</div>
+      </div>
+      <div class="field" id="f-email">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@yourcompany.co.uk" required>
+        <div class="err">Please enter a valid email address.</div>
+      </div>
+      <label class="consent" id="f-consent">
+        <input type="checkbox" id="consent" required>
+        <span>I'm happy for Expand Accounts to contact me about my enquiry.</span>
+      </label>
+      <div class="consent-err" id="consentErr">Please tick the box above so we can get back to you.</div>
+      <button class="submit" type="submit" id="submitBtn">Choose Time Slot For A Call</button>
+      <p class="after-form">Takes you straight to the booking calendar. No obligation, no sales script.</p>
+    </form>
+  </div>
+
+  <section class="proof">
+    <div class="shell">
+      <p class="proof-eyebrow">What Clients Say</p>
+      <h3>Trusted by the Construction Industry.</h3>
+      <div class="cards">
+
+        <figure class="pcard">
+          <div class="stars">
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          </div>
+          <blockquote>&ldquo;My CIS is fully on track, PAYE is running smoothly and our projections are heading the right way. Conor knows construction like the back of his hand &mdash; it's changed our business and our lives.&rdquo;</blockquote>
+          <figcaption><strong>Charlie Collins</strong><span>CJC Brickwork Ltd</span></figcaption>
+        </figure>
+
+        <figure class="pcard">
+          <div class="stars">
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          </div>
+          <blockquote>&ldquo;Top construction accountants. They clearly understand CIS and made everything simple for our scaffolding business.&rdquo;</blockquote>
+          <figcaption><strong>Shea Warner</strong><span>JMS Scaffolding Ltd</span></figcaption>
+        </figure>
+
+        <figure class="pcard">
+          <div class="stars">
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+          </div>
+          <blockquote>&ldquo;Conor has completely changed my opinion on accountants. He goes above and beyond &mdash; knows the field inside out. I couldn't recommend anyone else to look after your business.&rdquo;</blockquote>
+          <figcaption><strong>Louis</strong><span>Blue Flame Fire Engineering Ltd</span></figcaption>
+        </figure>
+
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- =========================================================
+     SCREEN — THE PRICE
+     ========================================================= -->
+<section class="screen" id="screen-price">
+  <div class="shell price-wrap">
+    <p class="price-eyebrow">Your price</p>
+    <div class="price-big"><span id="priceNum">&pound;0</span><span class="price-per">+ VAT per month</span></div>
+    <div class="price-lines" id="priceLines"></div>
+    <p class="price-note">Fixed monthly fee. No tie-in, and no extra invoices at year end. We have emailed a written copy to you.</p>
+    <a class="btn" id="priceBook" href="#">Book A Call To Get Started</a>
+    <p class="after-form">Fifteen minutes, no sales script. If we are not the right fit we will say so.</p>
+  </div>
+</section>
+
+<!-- =========================================================
+     SCREEN 8 — FALLBACK THANK YOU (only shown if redirect fails)
+     ========================================================= -->
+<section class="screen" id="screen-thanks">
+  <div class="shell thanks">
+    <div class="tick-big"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></div>
+    <h2>Got it, thank you.</h2>
+    <p>Last step: pick a time that suits you and we'll go through your numbers.</p>
+    <a class="btn" id="thanksLink" href="#">Choose My Time</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  Expand Accounts &middot; Construction Accountants Limited &nbsp;&middot;&nbsp; 0121 798 1504 &nbsp;&middot;&nbsp;
+  <a href="https://expandaccounts.co.uk" target="_blank" rel="noopener">expandaccounts.co.uk</a>
+</footer>
+
+<script>
+/* =========================================================
+   QUESTIONS - edit freely.
+   multi:true = choose all that apply. allowOther:true adds a free-text "Other".
+   ========================================================= */
+const QUESTIONS = [
+  {
+    id: "turnover",
+    q: "Roughly what's your annual turnover?",
+    help: "Ballpark is fine. It sets the base of your fee.",
+    options: [
+      "Under \u00a3250k",
+      "\u00a3250k \u2013 \u00a3500k",
+      "\u00a3500k \u2013 \u00a31m",
+      "\u00a31m \u2013 \u00a32m",
+      "\u00a32m \u2013 \u00a35m",
+      "\u00a35m+"
+    ]
+  },
+  {
+    id: "vat",
+    q: "Are you VAT registered?",
+    options: [
+      "Yes",
+      "No",
+      "Not sure"
+    ]
+  },
+  {
+    id: "paye",
+    q: "How many people are on your payroll?",
+    help: "Include yourself and any other directors. Two are already covered in the price.",
+    type: "number",
+    min: 0,
+    max: 200,
+    included: 2,
+    unit: "people on payroll"
+  },
+  {
+    id: "subbies",
+    q: "How many CIS subcontractors do you pay?",
+    help: "How many on average do you pay each month, roughly? Five are already covered in the price.",
+    type: "number",
+    min: 0,
+    max: 300,
+    included: 5,
+    unit: "subcontractors a month"
+  }
+];
+
+/* =========================================================
+   PRICING - the whole rate card lives here. Monthly, ex VAT.
+   price = base(turnover, VAT registered) + extra payroll + extra subbies
+   ========================================================= */
+const PRICING = {
+  /* Base already covers 2 on payroll and 5 CIS subbies. */
+  includedPaye:    2,
+  includedSubbies: 5,
+  perExtraPaye:    10,
+  perExtraSubby:   4,
+
+  /* Under 250k is the only band where VAT registration moves the price,
+     because above it you are over the registration threshold anyway. */
+  bands: {
+    "Under \u00a3250k":      { base: 195, vatBase: 225 },
+    "\u00a3250k \u2013 \u00a3500k": { base: 275 },
+    "\u00a3500k \u2013 \u00a31m":   { base: 325 },
+    "\u00a31m \u2013 \u00a32m":     { base: 375 },
+    "\u00a32m \u2013 \u00a35m":     { base: 435 },
+    "\u00a35m+":            { base: null }   /* null = speak to us */
+  }
+};
+
+function priceFor(a){
+  const band = PRICING.bands[a.turnover];
+  if (!band || band.base === null) return null;      // bespoke
+
+  const vatReg = a.vat === 'Yes';
+  const base   = (vatReg && band.vatBase) ? band.vatBase : band.base;
+
+  const paye    = Math.max(0, parseInt(a.paye, 10) || 0);
+  const subbies = Math.max(0, parseInt(a.subbies, 10) || 0);
+
+  const extraPaye    = Math.max(0, paye    - PRICING.includedPaye);
+  const extraSubbies = Math.max(0, subbies - PRICING.includedSubbies);
+
+  const payrollAdd = extraPaye    * PRICING.perExtraPaye;
+  const cisAdd     = extraSubbies * PRICING.perExtraSubby;
+
+  return {
+    base: base,
+    payrollAdd: payrollAdd,
+    cisAdd: cisAdd,
+    extraPaye: extraPaye,
+    extraSubbies: extraSubbies,
+    total: base + payrollAdd + cisAdd
+  };
+}
+
+function money(n){ return '\u00a3' + n.toLocaleString('en-GB'); }
+
+/* =========================================================
+   ENGINE
+   ========================================================= */
+const CFG = window.FUNNEL_CONFIG;
+const answers = {};
+let idx = 0;
+
+const screens = {
+  vsl:     document.getElementById('screen-vsl'),
+  quiz:    document.getElementById('screen-quiz'),
+  capture: document.getElementById('screen-capture'),
+  price:   document.getElementById('screen-price'),
+  thanks:  document.getElementById('screen-thanks')
+};
+const qHost = document.getElementById('qHost');
+const bar = document.getElementById('bar');
+const stepCount = document.getElementById('stepCount');
+
+/* ---- UTM / referrer capture (kept in memory, forwarded on submit) ---- */
+const params = new URLSearchParams(location.search);
+const tracking = {};
+['utm_source','utm_medium','utm_campaign','utm_content','utm_term','li_fat_id','gclid','fbclid']
+  .forEach(k => { if (params.get(k)) tracking[k] = params.get(k); });
+tracking.landing_page = location.pathname;
+tracking.referrer = document.referrer || "direct";
+
+/* ---- analytics helpers (silent no-ops when unconfigured) ---- */
+function track(name, data){
+  data = data || {};
+  if (window.gtag) window.gtag('event', name, data);
+  if (window.dataLayer) window.dataLayer.push(Object.assign({event:name}, data));
+  if (window.lintrk && CFG.linkedInConversionId && name === 'generate_lead') {
+    window.lintrk('track', { conversion_id: CFG.linkedInConversionId });
+  }
+  if (window.fbq && name === 'generate_lead') window.fbq('track','Lead');
+}
+if (CFG.ga4Id) {
+  const s = document.createElement('script');
+  s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + CFG.ga4Id;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag('js', new Date()); gtag('config', CFG.ga4Id);
+}
+
+function show(key){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[key].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+
+const TICK = '<span class="tick"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></span>';
+
+const OTHER = 'Other';
+const multiPicks = {};   // question id -> { picks:Set, other:String }
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderNumber(item){
+  const current = (answers[item.id] === undefined || answers[item.id] === '')
+    ? (item.included || 0)
+    : parseInt(answers[item.id], 10);
+
+  qHost.innerHTML =
+    '<h2 class="q">' + esc(item.q) + '</h2>' +
+    (item.help ? '<p class="q-help">' + esc(item.help) + '</p>' : '') +
+    '<div class="stepper">' +
+      '<button type="button" class="step-btn" id="numDown" aria-label="Fewer">&minus;</button>' +
+      '<input class="step-val" id="numVal" type="text" inputmode="numeric" pattern="[0-9]*" value="' + current + '" aria-label="' + esc(item.unit || 'Number') + '">' +
+      '<button type="button" class="step-btn" id="numUp" aria-label="More">+</button>' +
+    '</div>' +
+    '<p class="step-unit">' + esc(item.unit || '') + '</p>' +
+    '<button type="button" class="continue" id="contBtn">Continue</button>';
+
+  const val  = document.getElementById('numVal');
+  const up   = document.getElementById('numUp');
+  const down = document.getElementById('numDown');
+  const cont = document.getElementById('contBtn');
+
+  function clamp(n){
+    if (isNaN(n)) n = item.min || 0;
+    return Math.min(item.max === undefined ? 9999 : item.max,
+                    Math.max(item.min === undefined ? 0 : item.min, n));
+  }
+  function read(){ return clamp(parseInt(val.value, 10)); }
+  function write(n){ val.value = clamp(n); }
+
+  up.addEventListener('click',   () => write(read() + 1));
+  down.addEventListener('click', () => write(read() - 1));
+  val.addEventListener('input',  () => { val.value = val.value.replace(/[^0-9]/g, ''); });
+  val.addEventListener('blur',   () => write(read()));
+
+  cont.addEventListener('click', () => {
+    const n = read();
+    answers[item.id] = String(n);
+    track('quiz_answer', { step: idx + 1, question: item.q, answer: String(n) });
+    next();
+  });
+}
+
+function renderQuestion(){
+  const item = QUESTIONS[idx];
+  bar.style.width = ((idx + 1) / (QUESTIONS.length + 1) * 100) + '%';
+  stepCount.textContent = 'QUESTION ' + (idx + 1) + ' OF ' + QUESTIONS.length;
+
+  const isMulti = !!item.multi;
+  if (isMulti && !multiPicks[item.id]) multiPicks[item.id] = { picks: new Set(), other: '' };
+  const state = isMulti ? multiPicks[item.id] : null;
+
+  if (item.type === 'number') { renderNumber(item); return; }
+
+  const opts = item.options.slice();
+  if (item.allowOther) opts.push(OTHER);
+
+  qHost.innerHTML =
+    '<h2 class="q">' + esc(item.q) + '</h2>' +
+    (item.help ? '<p class="q-help">' + esc(item.help) + '</p>' : '') +
+    '<div class="options">' +
+      opts.map((o, i) =>
+        '<button type="button" class="opt' + (state && state.picks.has(o) ? ' chosen' : '') +
+        '" data-i="' + i + '">' + TICK + '<span>' + esc(o) + '</span></button>'
+      ).join('') +
+    '</div>' +
+    (item.maxPicks ? '<p class="pick-note" id="pickNote"></p>' : '') +
+    (item.allowOther
+      ? '<div class="other-wrap" id="otherWrap">' +
+          '<label for="otherText">' + esc(item.otherLabel || 'Tell us more') + '</label>' +
+          '<textarea id="otherText" rows="3" placeholder="In your own words"></textarea>' +
+          '<p class="hint">Please tell us what the problem is.</p>' +
+        '</div>'
+      : '') +
+    (isMulti ? '<button type="button" class="continue" id="contBtn" disabled>Continue</button>' : '');
+
+  const wrap = document.getElementById('otherWrap');
+  const area = document.getElementById('otherText');
+  const cont = document.getElementById('contBtn');
+  const note = document.getElementById('pickNote');
+
+  function updateNote(over){
+    if (!note) return;
+    const n = state.picks.size, max = item.maxPicks;
+    note.classList.toggle('full', n >= max && !over);
+    note.classList.toggle('over', !!over);
+    note.textContent = over
+      ? 'Pick your top ' + max + '. Tap one to swap it out.'
+      : n + ' of ' + max + ' chosen';
+  }
+  if (note) updateNote(false);
+
+  if (state && area) {
+    area.value = state.other || '';
+    if (state.picks.has(OTHER)) wrap.classList.add('on');
+  }
+  if (cont && state) cont.disabled = state.picks.size === 0;
+  if (area) area.addEventListener('input', () => {
+    if (state) state.other = area.value;
+    wrap.classList.remove('warn');
+  });
+
+  qHost.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const value = opts[+btn.dataset.i];
+
+      /* ---- single select: pick and advance ---- */
+      if (!isMulti) {
+        btn.classList.add('chosen');
+        answers[item.id] = value;
+        track('quiz_answer', { step: idx + 1, question: item.q, answer: value });
+        setTimeout(next, 140);
+        return;
+      }
+
+      /* ---- multi select: toggle, wait for Continue ---- */
+      if (state.picks.has(value)) {
+        state.picks.delete(value);
+      } else {
+        /* respect a pick cap rather than silently ignoring the tap */
+        if (item.maxPicks && state.picks.size >= item.maxPicks) {
+          updateNote(true);
+          return;
+        }
+        state.picks.add(value);
+      }
+      btn.classList.toggle('chosen', state.picks.has(value));
+      updateNote(false);
+
+      if (wrap) {
+        wrap.classList.toggle('on', state.picks.has(OTHER));
+        if (state.picks.has(OTHER)) { wrap.classList.remove('warn'); area.focus(); }
+      }
+      cont.disabled = state.picks.size === 0;
+    });
+  });
+
+  if (cont) cont.addEventListener('click', () => {
+    const picked = opts.filter(o => state.picks.has(o) && o !== OTHER);
+
+    if (state.picks.has(OTHER)) {
+      const text = (area.value || '').trim();
+      if (text.length < 2) { wrap.classList.add('warn'); area.focus(); return; }
+      state.other = text;
+      answers[item.id + '_other'] = text;
+      picked.push('Other: ' + text);
+    } else {
+      delete answers[item.id + '_other'];
+    }
+
+    answers[item.id] = picked.join(' | ');
+    track('quiz_answer', { step: idx + 1, question: item.q, answer: answers[item.id] });
+    next();
+  });
+}
+
+function next(){
+  if (idx < QUESTIONS.length - 1) { idx++; renderQuestion(); }
+  else { bar.style.width = '100%'; track('quiz_complete', {}); show('capture'); }
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  track('quiz_start', tracking);
+  idx = 0; renderQuestion(); show('quiz');
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  if (idx === 0) { show('vsl'); } else { idx--; renderQuestion(); }
+});
+
+/* ---------- video ----------
+   Handles three cases: no video (placeholder), a self-hosted mp4, or an
+   iframe embed. Audible autoplay is attempted when asked for, with a
+   graceful fall back to muted + a tap-for-sound button. */
+(function setupVideo(){
+  const frame = document.querySelector('.video-frame');
+  const vp = document.getElementById('videoPlaceholder');
+  const url = (CFG.videoUrl || '').trim();
+
+  if (!url) {
+    if (vp) vp.addEventListener('click', () => track('video_play_placeholder', {}));
+    return;
+  }
+
+  const isFile = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+  const mode = CFG.videoAutoplay || 'sound';
+  if (vp) vp.style.display = 'none';   // hidden, not removed - we may need it back
+
+  if (!isFile) {
+    /* ---- iframe embed (Vimeo / YouTube / Loom) ---- */
+    const u = new URL(url, location.href);
+    if (mode !== 'off') {
+      u.searchParams.set('autoplay', '1');
+      if (/youtube|youtu\.be/.test(u.hostname)) u.searchParams.set('mute', '1');
+      else u.searchParams.set('muted', '1');
+    }
+    u.searchParams.set('playsinline', '1');
+    const f = document.createElement('iframe');
+    f.src = u.toString();
+    f.allow = 'autoplay; fullscreen; picture-in-picture';
+    f.setAttribute('allowfullscreen', '');
+    f.setAttribute('title', 'Expand Accounts introduction');
+    frame.appendChild(f);
+    track('video_loaded', { type: 'embed' });
+    return;
+  }
+
+  /* ---- self-hosted file ---- */
+  const v = document.createElement('video');
+  v.src = url;
+  v.setAttribute('playsinline', '');
+  v.playsInline = true;
+  v.controls = true;
+  v.preload = 'metadata';
+  if (CFG.videoPoster) v.poster = CFG.videoPoster;
+
+  /* If the file isn't uploaded yet (or 404s), fall back to the placeholder
+     rather than showing a dead black box. */
+  v.addEventListener('error', function(){
+    v.remove();
+    const ov = frame.querySelector('.play-overlay'); if (ov) ov.remove();
+    const sc = frame.querySelector('.sound-cta');    if (sc) sc.remove();
+    if (vp) vp.style.display = '';
+    track('video_missing', { url: url });
+  });
+
+  frame.appendChild(v);
+
+  /* Click-to-play: keep the branded play button rather than a bare player. */
+  if (mode === 'off') {
+    v.controls = false;
+    const over = document.createElement('button');
+    over.type = 'button';
+    over.className = 'play-overlay';
+    over.setAttribute('aria-label', 'Play video');
+    over.innerHTML = '<span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+    frame.appendChild(over);
+    over.addEventListener('click', () => {
+      v.controls = true;
+      v.muted = false;
+      v.volume = 1;
+      v.play().catch(() => { v.muted = true; v.play().catch(function(){}); });
+      over.remove();
+      track('video_play', { trigger: 'click' });
+    });
+    return;
+  }
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'sound-cta';
+  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a6.8 6.8 0 0 1 0 13.4v2.1a8.9 8.9 0 0 0 0-17.6z"/></svg><span>Tap for sound</span>';
+  frame.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    v.muted = false;
+    v.volume = 1;
+    v.play().catch(function(){});
+    btn.classList.remove('show');
+    track('video_unmuted', {});
+  });
+
+  /* Try audible first. Browsers block this unless the visitor has history
+     with the domain, so fall back to muted and ask for the tap. */
+  if (mode === 'sound') {
+    v.muted = false;
+    v.play().then(() => {
+      track('video_autoplay', { sound: true });
+    }).catch(() => {
+      v.muted = true;
+      v.play().then(() => {
+        btn.classList.add('show');
+        track('video_autoplay', { sound: false });
+      }).catch(() => { /* autoplay refused entirely; controls are there */ });
+    });
+  } else {
+    v.muted = true;
+    v.play().then(() => btn.classList.add('show')).catch(function(){});
+  }
+})();
+
+/* ---------- form ---------- */
+const form = document.getElementById('leadForm');
+const submitBtn = document.getElementById('submitBtn');
+
+function invalid(id, bad){
+  document.getElementById(id).classList.toggle('invalid', bad);
+  return bad;
+}
+
+/* clear the red state as soon as someone starts correcting the field */
+[['name','f-name'],['phone','f-phone'],['email','f-email']].forEach(pair => {
+  const input = document.getElementById(pair[0]);
+  input.addEventListener('input', () => document.getElementById(pair[1]).classList.remove('invalid'));
+});
+
+document.getElementById('consent').addEventListener('change', function () {
+  document.getElementById('f-consent').classList.remove('invalid');
+  document.getElementById('consentErr').classList.remove('show');
+});
+
+/* Calendly's phone field wants international format. "07123 456789" -> "+447123456789" */
+function toE164UK(raw){
+  const s = String(raw || '').trim();
+  if (s.charAt(0) === '+') return '+' + s.slice(1).replace(/\D/g, '');
+  const d = s.replace(/\D/g, '');
+  if (!d) return '';
+  if (d.indexOf('00') === 0) return '+' + d.slice(2);
+  if (d.indexOf('44') === 0) return '+' + d;
+  if (d.charAt(0) === '0')   return '+44' + d.slice(1);
+  return '+44' + d;
+}
+
+function buildBookingUrl(name, email, phone){
+  let url = CFG.bookingUrl;
+  if (!url) return null;
+  const u = new URL(url);
+  u.searchParams.set('name', name);
+  u.searchParams.set('email', email);
+  Object.keys(tracking).forEach(k => {
+    if (k.indexOf('utm_') === 0) u.searchParams.set(k, tracking[k]);
+  });
+  /* a1 = the event's first custom question, which is Phone number */
+  if (CFG.prefillPhoneToCalendly && phone) u.searchParams.set('a1', toE164UK(phone));
+  return u.toString();
+}
+
+function revealPrice(quote, name, email, phone){
+  const numEl   = document.getElementById('priceNum');
+  const linesEl = document.getElementById('priceLines');
+  const bookEl  = document.getElementById('priceBook');
+
+  if (!quote) {
+    numEl.textContent = "Let's talk";
+    document.querySelector('.price-per').style.display = 'none';
+    linesEl.innerHTML = '<div class="price-line"><span>Over \u00a35m turnover</span>' +
+      '<span>Priced individually</span></div>';
+  } else {
+    numEl.textContent = money(quote.total);
+    let rows = '<div class="price-line"><span>Base fee, includes ' + PRICING.includedPaye +
+               ' on payroll and ' + PRICING.includedSubbies + ' subbies</span><span>' +
+               money(quote.base) + '</span></div>';
+    if (quote.payrollAdd) {
+      rows += '<div class="price-line"><span>' + quote.extraPaye + ' extra on payroll</span><span>+ ' +
+              money(quote.payrollAdd) + '</span></div>';
+    }
+    if (quote.cisAdd) {
+      rows += '<div class="price-line"><span>' + quote.extraSubbies + ' extra CIS subbies</span><span>+ ' +
+              money(quote.cisAdd) + '</span></div>';
+    }
+    rows += '<div class="price-line total"><span>Your monthly fee</span><span>' +
+            money(quote.total) + '</span></div>';
+    linesEl.innerHTML = rows;
+  }
+
+  const dest = buildBookingUrl(name, email, phone);
+  bookEl.href = dest || (CFG.bookingUrl || '#');
+
+  track('quote_shown', { value: quote ? quote.total : 0, currency: 'GBP' });
+  show('price');
+}
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  const name  = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const ok    = document.getElementById('consent').checked;
+
+  let bad = false;
+  bad = invalid('f-name',  name.length < 2) || bad;
+  bad = invalid('f-phone', phone.replace(/[^\d]/g,'').length < 10) || bad;
+  bad = invalid('f-email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) || bad;
+  const consentRow = document.getElementById('f-consent');
+  const consentErr = document.getElementById('consentErr');
+  consentRow.classList.toggle('invalid', !ok);
+  consentErr.classList.toggle('show', !ok);
+  if (!ok) bad = true;
+
+  if (bad) {
+    /* Make the failure visible - otherwise the button looks broken and people leave */
+    const firstBad = document.querySelector('.field.invalid, .consent.invalid');
+    if (firstBad && firstBad.scrollIntoView) {
+      firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'One moment…';
+
+  /* Readable one-liner so the alert is useful without opening anything */
+  const summary = QUESTIONS.map(function(q){
+    return q.q + '  ' + (answers[q.id] || '-');
+  }).join('\n') + '\n\nQUOTED: ' + (priceFor(answers)
+      ? money(priceFor(answers).total) + ' + VAT per month'
+      : 'Bespoke - over \u00a35m turnover');
+
+  const quote = priceFor(answers);
+  const quoteText = quote
+    ? money(quote.total) + ' + VAT per month'
+    : 'Bespoke - over \u00a35m turnover';
+
+  const payload = Object.assign(
+    {
+      quoted_price: quote ? quote.total : '',
+      quote_text: quoteText,
+      page: 'quote',
+      name: name,
+      phone: phone,
+      phone_e164: toE164UK(phone),
+      email: email,
+      source: (tracking.utm_source
+                 ? tracking.utm_source + (tracking.utm_medium ? ' / ' + tracking.utm_medium : '')
+                 : (tracking.referrer && tracking.referrer !== 'direct' ? tracking.referrer : 'direct')),
+      submitted_at: new Date().toISOString(),
+      answers_summary: summary,
+      booking_started: true,
+      booking_confirmed: 'unknown'
+    },
+    answers, tracking
+  );
+
+  track('generate_lead', { value: 1, currency: 'GBP' });
+
+  const go = (function(){
+    let done = false;
+    return function(){
+      if (done) return;           // only ever reveal once
+      done = true;
+      revealPrice(quote, name, email, phone);
+    };
+  })();
+
+  if (CFG.leadWebhook) {
+    const body = JSON.stringify(payload);
+    let sent = false;
+
+    /* sendBeacon survives the page unloading, so the lead still lands even if
+       they close the tab the instant they hit the button. */
+    if (navigator.sendBeacon) {
+      try {
+        sent = navigator.sendBeacon(CFG.leadWebhook, new Blob([body], { type: 'text/plain' }));
+      } catch (e) { sent = false; }
+    }
+
+    if (!sent) {
+      fetch(CFG.leadWebhook, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,          // request completes even after we navigate away
+        headers: { 'Content-Type': 'text/plain' },
+        body: body
+      }).catch(function(){ /* never block the redirect */ });
+    }
+
+    /* Never leave someone staring at a spinner because a webhook is slow. */
+    setTimeout(go, 600);
+  } else {
+    setTimeout(go, 250);
+  }
+});
+</script>
+<!-- ===== LinkedIn Insight Tag (partner id 8370186) ===== -->
+<script type="text/javascript">
+_linkedin_partner_id = "8370186";
+window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+</script>
+<script type="text/javascript">
+(function(l) {
+if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+window.lintrk.q=[]}
+var s = document.getElementsByTagName("script")[0];
+var b = document.createElement("script");
+b.type = "text/javascript";b.async = true;
+b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+s.parentNode.insertBefore(b, s);})(window.lintrk);
+</script>
+<!-- ===== end LinkedIn Insight Tag ===== -->
+<noscript>
+<img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=8370186&amp;fmt=gif" />
+</noscript>
+
+</body>
+</html>
