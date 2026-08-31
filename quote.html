@@ -453,8 +453,8 @@ footer a{color:#cdeed9}
         <span>I'm happy for Expand Accounts to contact me about my enquiry.</span>
       </label>
       <div class="consent-err" id="consentErr">Please tick the box above so we can get back to you.</div>
-      <button class="submit" type="submit" id="submitBtn">Choose Time Slot For A Call</button>
-      <p class="after-form">Takes you straight to the booking calendar. No obligation, no sales script.</p>
+      <button class="submit" type="submit" id="submitBtn">Reveal My Price</button>
+      <p class="after-form">Your price appears on the next screen. No obligation, no sales script.</p>
     </form>
   </div>
 
@@ -559,10 +559,12 @@ const QUESTIONS = [
   {
     id: "vat",
     q: "Are you VAT registered?",
+    /* Only worth asking below the registration threshold. Above \u00a3250k
+       everyone is registered, so the band price already assumes it. */
+    askIf: function (a) { return a.turnover === "Under \u00a3250k"; },
     options: [
       "Yes",
-      "No",
-      "Not sure"
+      "No"
     ]
   },
   {
@@ -742,8 +744,11 @@ function renderNumber(item){
 
 function renderQuestion(){
   const item = QUESTIONS[idx];
-  bar.style.width = ((idx + 1) / (QUESTIONS.length + 1) * 100) + '%';
-  stepCount.textContent = 'QUESTION ' + (idx + 1) + ' OF ' + QUESTIONS.length;
+  const shown = visibleQuestions();
+  const total = shown.length;
+  const pos   = shown.indexOf(item) + 1;
+  bar.style.width = (pos / (total + 1) * 100) + '%';
+  stepCount.textContent = 'QUESTION ' + pos + ' OF ' + total;
 
   const isMulti = !!item.multi;
   if (isMulti && !multiPicks[item.id]) multiPicks[item.id] = { picks: new Set(), other: '' };
@@ -853,8 +858,24 @@ function renderQuestion(){
   });
 }
 
+/* A question can opt out of being asked. Anything skipped is also cleared,
+   so a stale answer from a back-and-forth cannot leak into the price. */
+function asked(i){
+  const q = QUESTIONS[i];
+  if (!q || typeof q.askIf !== 'function') return true;
+  const ok = !!q.askIf(answers);
+  if (!ok) delete answers[q.id];
+  return ok;
+}
+
+function visibleQuestions(){
+  return QUESTIONS.filter((q, i) => asked(i));
+}
+
 function next(){
-  if (idx < QUESTIONS.length - 1) { idx++; renderQuestion(); }
+  let i = idx + 1;
+  while (i < QUESTIONS.length && !asked(i)) i++;
+  if (i < QUESTIONS.length) { idx = i; renderQuestion(); }
   else { bar.style.width = '100%'; track('quiz_complete', {}); show('capture'); }
 }
 
@@ -864,7 +885,9 @@ document.getElementById('startBtn').addEventListener('click', () => {
 });
 
 document.getElementById('backBtn').addEventListener('click', () => {
-  if (idx === 0) { show('vsl'); } else { idx--; renderQuestion(); }
+  let i = idx - 1;
+  while (i >= 0 && !asked(i)) i--;
+  if (i < 0) { show('vsl'); } else { idx = i; renderQuestion(); }
 });
 
 /* ---------- video ----------
