@@ -17,10 +17,13 @@
      ============================================================ -->
 <script>
 window.FUNNEL_CONFIG = {
-  // Where a completed form sends the person. Name + email are pre-filled.
-  // This is the DIRECT event link, not the /d/ routing form: the quiz does the
-  // qualifying, so Calendly should only be asked to pick a time.
-  bookingUrl: "https://calendly.com/expandaccounts/30min",
+  // Two ways to book, shown side by side once the price is on screen.
+  // Both are DIRECT event links, not the /d/ routing form: the quiz has already
+  // done the qualifying, so Calendly only has to pick a time.
+  //   onboardingUrl = ready to go ahead, 20 min
+  //   questionsUrl  = still deciding, 10 min
+  onboardingUrl: "https://calendly.com/expandaccounts/onboarding-call",
+  questionsUrl:  "https://calendly.com/expandaccounts/questions-call",
 
   // Google Apps Script web app. Receives every completed form, whether or not
   // they go on to book. Writes a row to the "Funnel Leads" sheet and emails you.
@@ -51,10 +54,12 @@ window.FUNNEL_CONFIG = {
   //            (browsers block audible autoplay for first-time visitors)
   videoAutoplay: "off",
 
-  // The Initial Consultation event now asks only Name, Email and Phone number.
-  // Phone is its first (and only) custom question, so Calendly's "a1" param fills it.
-  // Leave true so nobody has to type their number twice.
-  prefillPhoneToCalendly: true
+  // Calendly's "a1" param fills an event's FIRST custom question. On the
+  // onboarding and questions calls that first question is not the phone number,
+  // so prefilling would drop a phone number into the wrong box. Keep this false
+  // unless those events are changed to ask for phone first. The number still
+  // reaches you either way, via the lead webhook above.
+  prefillPhoneToCalendly: false
 };
 </script>
 
@@ -330,6 +335,13 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .thanks h2{color:var(--deep);font-size:28px;margin:0 0 8px}
 .thanks p{color:var(--muted);max-width:38ch;margin:0 auto 22px}
 .thanks a.btn, .price-wrap a.btn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;border-radius:99px;padding:15px 30px;font-family:"Varela Round",sans-serif;font-size:18px}
+.price-cta{max-width:420px;margin:0 auto}
+.price-cta a.btn{display:block;width:100%;box-sizing:border-box;text-align:center}
+.price-cta .cta-sub{text-align:center;font-size:13px;color:var(--muted);margin:9px 0 0;line-height:1.5}
+.price-wrap a.btn.btn-quiet{background:#fff;color:var(--deep);border:2px solid var(--line);font-size:16px;padding:13px 26px}
+.price-wrap a.btn.btn-quiet:hover{border-color:var(--green);color:var(--green)}
+.cta-or{display:flex;align-items:center;gap:14px;margin:22px 0 18px;color:var(--muted);font-size:13px}
+.cta-or::before,.cta-or::after{content:"";flex:1;height:1px;background:var(--line)}
 
 footer{background:var(--deep-2);color:#9fc2ab;text-align:center;padding:22px 18px;font-size:12.5px}
 footer a{color:#cdeed9}
@@ -514,8 +526,15 @@ footer a{color:#cdeed9}
     <div class="price-big"><span id="priceNum">&pound;0</span><span class="price-per">+ VAT per month</span></div>
     <div class="price-lines" id="priceLines"></div>
     <p class="price-note">Fixed monthly fee. No tie-in, and no surprise invoice at year end. Everything in the compliance service is covered.</p>
-    <a class="btn" id="priceBook" href="#">Book A Call To Get Started</a>
-    <p class="after-form">Fifteen minutes, no sales script. If we are not the right fit we will say so.</p>
+    <div class="price-cta">
+      <a class="btn" id="priceBook" href="#">Book My Onboarding Call</a>
+      <p class="cta-sub">Twenty minutes. You are ready to go ahead and we will get you set up.</p>
+
+      <div class="cta-or"><span>or</span></div>
+
+      <a class="btn btn-quiet" id="priceAsk" href="#">Book A 10 Minute Questions Call</a>
+      <p class="cta-sub">Still weighing it up? Ask me anything. No sales script.</p>
+    </div>
   </div>
 </section>
 
@@ -1033,8 +1052,8 @@ function toE164UK(raw){
   return '+44' + d;
 }
 
-function buildBookingUrl(name, email, phone){
-  let url = CFG.bookingUrl;
+function buildBookingUrl(base, name, email, phone){
+  const url = base;
   if (!url) return null;
   const u = new URL(url);
   u.searchParams.set('name', name);
@@ -1051,6 +1070,7 @@ function revealPrice(quote, name, email, phone){
   const numEl   = document.getElementById('priceNum');
   const linesEl = document.getElementById('priceLines');
   const bookEl  = document.getElementById('priceBook');
+  const askEl   = document.getElementById('priceAsk');
 
   if (!quote) {
     numEl.textContent = "Let's talk";
@@ -1075,8 +1095,10 @@ function revealPrice(quote, name, email, phone){
     linesEl.innerHTML = rows;
   }
 
-  const dest = buildBookingUrl(name, email, phone);
-  bookEl.href = dest || (CFG.bookingUrl || '#');
+  bookEl.href = buildBookingUrl(CFG.onboardingUrl, name, email, phone)
+                || CFG.onboardingUrl || '#';
+  askEl.href  = buildBookingUrl(CFG.questionsUrl,  name, email, phone)
+                || CFG.questionsUrl  || '#';
 
   track('quote_shown', { value: quote ? quote.total : 0, currency: 'GBP' });
   show('price');
