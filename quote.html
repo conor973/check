@@ -155,11 +155,11 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .sound-cta.show{display:flex}
 /* branded click-to-play overlay */
 .play-overlay{
-  position:absolute;inset:0;width:100%;height:100%;border:0;padding:0 0 11% 0;
+  position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;
   /* darken low and to the edges so the face stays clear and bright */
   background:linear-gradient(to bottom, rgba(6,20,11,.10) 0%, rgba(6,20,11,.12) 45%, rgba(6,20,11,.52) 100%);
   cursor:pointer;z-index:2;
-  display:flex;align-items:flex-end;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   transition:background .2s;
 }
 .play-overlay:hover{background:linear-gradient(to bottom, rgba(6,20,11,.04) 0%, rgba(6,20,11,.06) 45%, rgba(6,20,11,.44) 100%)}
@@ -190,6 +190,17 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .cta-box:hover{background:#fff;border-color:#fff}
 .cta-box:hover .cta-main,.cta-box:hover .cta-sub{color:var(--deep)}
 .cta-box:active{transform:translateY(1px)}
+/* locked until the video has been watched through */
+.cta-box.is-locked{
+  cursor:not-allowed;opacity:.55;border-color:rgba(255,255,255,.28);
+  background:rgba(255,255,255,.03);
+}
+.cta-box.is-locked:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.28)}
+.cta-box.is-locked:hover .cta-main{color:#fff}
+.cta-box.is-locked:hover .cta-sub{color:#cdeed9}
+.cta-box.is-locked:active{transform:none}
+.cta-box.is-unlocked{animation:ctaPop .35s ease both}
+@keyframes ctaPop{from{opacity:.55;transform:scale(.99)}to{opacity:1;transform:none}}
 .cta-main{display:block;font-family:"Varela Round",sans-serif;font-size:clamp(19px,4.6vw,24px);color:#fff}
 .cta-sub{display:block;font-size:13.5px;color:#cdeed9;margin-top:4px;font-weight:500}
 
@@ -404,12 +415,9 @@ footer a{color:#cdeed9}
         -->
       </div>
 
-      <h1>Find Out Exactly What Your Accounts Will Cost</h1>
-      <p class="sub">Four quick questions about your business and you'll have a real monthly price. No &quot;it depends&quot;, no waiting for a callback.</p>
-
-      <button class="cta-box" id="startBtn">
+      <button class="cta-box is-locked" id="startBtn" disabled aria-disabled="true">
         <span class="cta-main">Get My Price</span>
-        <span class="cta-sub">Takes about 60 seconds</span>
+        <span class="cta-sub" id="ctaSub">Watch the video to unlock</span>
       </button>
 
       <div class="trust">
@@ -913,6 +921,77 @@ document.getElementById('backBtn').addEventListener('click', () => {
    Handles three cases: no video (placeholder), a self-hosted mp4, or an
    iframe embed. Audible autoplay is attempted when asked for, with a
    graceful fall back to muted + a tap-for-sound button. */
+/* ---------- video gate ----------
+   "Get My Price" stays locked until the video has been watched through.
+   Pausing and rewinding are allowed; skipping ahead is not. The gate always
+   FAILS OPEN - if there is no video, or it 404s, or it is an embed we cannot
+   measure, the button unlocks immediately so the page can never dead-end. */
+const ctaBtn = document.getElementById('startBtn');
+const ctaSub = document.getElementById('ctaSub');
+let ctaUnlocked = false;
+
+function unlockCta(reason){
+  if (ctaUnlocked) return;
+  ctaUnlocked = true;
+  ctaBtn.disabled = false;
+  ctaBtn.removeAttribute('aria-disabled');
+  ctaBtn.classList.remove('is-locked');
+  ctaBtn.classList.add('is-unlocked');
+  if (ctaSub) ctaSub.textContent = 'Takes about 60 seconds';
+  track('cta_unlocked', { reason: reason || 'video_complete' });
+}
+
+function fmtRemaining(sec){
+  sec = Math.max(0, Math.ceil(sec));
+  const m = Math.floor(sec / 60), r = sec % 60;
+  return m + ':' + String(r).padStart(2, '0');
+}
+
+function gateOnVideo(v){
+  let maxWatched = 0;
+  const SLACK = 1.0;   /* seconds of tolerance for normal playback jitter */
+
+  function paint(){
+    if (ctaUnlocked || !ctaSub) return;
+    const d = v.duration;
+    if (!isFinite(d) || d <= 0) { ctaSub.textContent = 'Watch the video to unlock'; return; }
+    const left = d - maxWatched;
+    ctaSub.textContent = left <= 1
+      ? 'Almost there\u2026'
+      : fmtRemaining(left) + ' left to unlock';
+  }
+
+  v.addEventListener('loadedmetadata', paint);
+  paint();
+
+  v.addEventListener('timeupdate', function(){
+    if (ctaUnlocked) return;
+    if (v.currentTime > maxWatched && v.currentTime - maxWatched < 2) {
+      maxWatched = v.currentTime;
+    }
+    paint();
+    /* Some browsers never fire "ended" if the last frames are dropped. */
+    if (isFinite(v.duration) && v.duration > 0 && maxWatched >= v.duration - 0.75) {
+      unlockCta('video_complete');
+    }
+  });
+
+  /* Block skipping ahead, allow scrubbing back over what they have seen. */
+  v.addEventListener('seeking', function(){
+    if (ctaUnlocked) return;
+    if (v.currentTime > maxWatched + SLACK) {
+      v.currentTime = maxWatched;
+      track('video_seek_blocked', { at: Math.round(maxWatched) });
+      if (ctaSub) {
+        ctaSub.textContent = 'No skipping ahead';
+        setTimeout(paint, 1400);
+      }
+    }
+  });
+
+  v.addEventListener('ended', function(){ unlockCta('video_ended'); });
+}
+
 (function setupVideo(){
   const frame = document.querySelector('.video-frame');
   const vp = document.getElementById('videoPlaceholder');
@@ -920,6 +999,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
 
   if (!url) {
     if (vp) vp.addEventListener('click', () => track('video_play_placeholder', {}));
+    unlockCta('no_video');
     return;
   }
 
@@ -943,6 +1023,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
     f.setAttribute('title', 'Expand Accounts introduction');
     frame.appendChild(f);
     track('video_loaded', { type: 'embed' });
+    unlockCta('embed_unmeasurable');
     return;
   }
 
@@ -963,9 +1044,11 @@ document.getElementById('backBtn').addEventListener('click', () => {
     const sc = frame.querySelector('.sound-cta');    if (sc) sc.remove();
     if (vp) vp.style.display = '';
     track('video_missing', { url: url });
+    unlockCta('video_missing');
   });
 
   frame.appendChild(v);
+  gateOnVideo(v);
 
   /* Click-to-play: keep the branded play button rather than a bare player. */
   if (mode === 'off') {
