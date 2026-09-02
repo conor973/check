@@ -974,7 +974,7 @@ function gateOnVideo(v){
     if (ctaFill) ctaFill.style.width = pct.toFixed(1) + '%';
     if (!ctaSub) return;
     /* Muted playback does not count, so say why the bar has stalled. */
-    if (v.muted && !v.paused) ctaSub.textContent = 'Turn the sound on to unlock';
+    if (v.muted && !v.paused && v.currentTime > 1) ctaSub.textContent = 'Turn the sound on to unlock';
     else if (pct >= 99)       ctaSub.textContent = 'Almost there\u2026';
     else                      ctaSub.textContent = 'Watch to unlock';
   }
