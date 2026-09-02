@@ -52,7 +52,7 @@ window.FUNNEL_CONFIG = {
   // "muted"  = autoplay silently, with a tap-for-sound button
   // "sound"  = try audible autoplay, fall back to muted + tap-for-sound
   //            (browsers block audible autoplay for first-time visitors)
-  videoAutoplay: "off",
+  videoAutoplay: "sound",
 
   // Calendly's "a1" param fills an event's FIRST custom question. On the
   // onboarding and questions calls that first question is not the phone number,
@@ -181,6 +181,7 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
   margin:0 auto 26px;max-width:44ch;
 }
 .cta-box{
+  position:relative;overflow:hidden;
   display:block;width:100%;border:2px solid rgba(255,255,255,.55);
   background:rgba(255,255,255,.06);border-radius:var(--radius);
   padding:18px 20px;text-align:center;cursor:pointer;
@@ -199,6 +200,15 @@ main{flex:1 0 auto;display:flex;flex-direction:column}
 .cta-box.is-locked:hover .cta-main{color:#fff}
 .cta-box.is-locked:hover .cta-sub{color:#cdeed9}
 .cta-box.is-locked:active{transform:none}
+/* progress wash that fills the button as the video plays */
+.cta-fill{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg, rgba(255,255,255,.10), rgba(255,255,255,.20));
+  border-right:1px solid rgba(255,255,255,.35);
+  transition:width .3s linear;pointer-events:none;z-index:0;
+}
+.cta-box.is-unlocked .cta-fill{opacity:0;transition:opacity .3s ease}
+.cta-text{position:relative;z-index:1;display:block}
 .cta-box.is-unlocked{animation:ctaPop .35s ease both}
 @keyframes ctaPop{from{opacity:.55;transform:scale(.99)}to{opacity:1;transform:none}}
 .cta-main{display:block;font-family:"Varela Round",sans-serif;font-size:clamp(19px,4.6vw,24px);color:#fff}
@@ -416,8 +426,11 @@ footer a{color:#cdeed9}
       </div>
 
       <button class="cta-box is-locked" id="startBtn" disabled aria-disabled="true">
-        <span class="cta-main">Get My Price</span>
-        <span class="cta-sub" id="ctaSub">Watch the video to unlock</span>
+        <span class="cta-fill" id="ctaFill" aria-hidden="true"></span>
+        <span class="cta-text">
+          <span class="cta-main">Get My Price</span>
+          <span class="cta-sub" id="ctaSub">Watch the video to unlock</span>
+        </span>
       </button>
 
       <div class="trust">
@@ -926,8 +939,9 @@ document.getElementById('backBtn').addEventListener('click', () => {
    Pausing and rewinding are allowed; skipping ahead is not. The gate always
    FAILS OPEN - if there is no video, or it 404s, or it is an embed we cannot
    measure, the button unlocks immediately so the page can never dead-end. */
-const ctaBtn = document.getElementById('startBtn');
-const ctaSub = document.getElementById('ctaSub');
+const ctaBtn  = document.getElementById('startBtn');
+const ctaSub  = document.getElementById('ctaSub');
+const ctaFill = document.getElementById('ctaFill');
 let ctaUnlocked = false;
 
 function unlockCta(reason){
@@ -937,7 +951,8 @@ function unlockCta(reason){
   ctaBtn.removeAttribute('aria-disabled');
   ctaBtn.classList.remove('is-locked');
   ctaBtn.classList.add('is-unlocked');
-  if (ctaSub) ctaSub.textContent = 'Takes about 60 seconds';
+  if (ctaSub)  ctaSub.textContent = 'Takes about 60 seconds';
+  if (ctaFill) ctaFill.style.width = '100%';
   track('cta_unlocked', { reason: reason || 'video_complete' });
 }
 
@@ -949,38 +964,47 @@ function fmtRemaining(sec){
 
 function gateOnVideo(v){
   let maxWatched = 0;
+  let lastT = 0;
   const SLACK = 1.0;   /* seconds of tolerance for normal playback jitter */
 
   function paint(){
-    if (ctaUnlocked || !ctaSub) return;
+    if (ctaUnlocked) return;
     const d = v.duration;
-    if (!isFinite(d) || d <= 0) { ctaSub.textContent = 'Watch the video to unlock'; return; }
-    const left = d - maxWatched;
-    ctaSub.textContent = left <= 1
-      ? 'Almost there\u2026'
-      : fmtRemaining(left) + ' left to unlock';
+    const pct = (isFinite(d) && d > 0) ? Math.min(100, (maxWatched / d) * 100) : 0;
+    if (ctaFill) ctaFill.style.width = pct.toFixed(1) + '%';
+    if (!ctaSub) return;
+    /* Muted playback does not count, so say why the bar has stalled. */
+    if (v.muted && !v.paused) ctaSub.textContent = 'Turn the sound on to unlock';
+    else if (pct >= 99)       ctaSub.textContent = 'Almost there\u2026';
+    else                      ctaSub.textContent = 'Watch to unlock';
   }
 
   v.addEventListener('loadedmetadata', paint);
+  ['play','pause','volumechange','seeked'].forEach(function(e){
+    v.addEventListener(e, paint);
+  });
   paint();
 
   v.addEventListener('timeupdate', function(){
     if (ctaUnlocked) return;
-    if (v.currentTime > maxWatched && v.currentTime - maxWatched < 2) {
-      maxWatched = v.currentTime;
+    const t = v.currentTime;
+    /* Credit progress only for audible, forward, real-time playback. */
+    if (!v.muted && t > maxWatched && t - lastT >= 0 && t - lastT < 2) {
+      maxWatched = t;
     }
+    lastT = t;
     paint();
-    /* Some browsers never fire "ended" if the last frames are dropped. */
     if (isFinite(v.duration) && v.duration > 0 && maxWatched >= v.duration - 0.75) {
       unlockCta('video_complete');
     }
   });
 
-  /* Block skipping ahead, allow scrubbing back over what they have seen. */
+  /* Block skipping ahead; scrubbing back over watched ground is fine. */
   v.addEventListener('seeking', function(){
     if (ctaUnlocked) return;
     if (v.currentTime > maxWatched + SLACK) {
       v.currentTime = maxWatched;
+      lastT = maxWatched;
       track('video_seek_blocked', { at: Math.round(maxWatched) });
       if (ctaSub) {
         ctaSub.textContent = 'No skipping ahead';
@@ -989,7 +1013,10 @@ function gateOnVideo(v){
     }
   });
 
-  v.addEventListener('ended', function(){ unlockCta('video_ended'); });
+  v.addEventListener('ended', function(){
+    if (isFinite(v.duration) && maxWatched >= v.duration - 1.5) unlockCta('video_ended');
+    else paint();
+  });
 }
 
 (function setupVideo(){
