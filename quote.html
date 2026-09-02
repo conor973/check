@@ -1077,8 +1077,11 @@ function gateOnVideo(v){
   frame.appendChild(v);
   gateOnVideo(v);
 
-  /* Click-to-play: keep the branded play button rather than a bare player. */
-  if (mode === 'off') {
+  /* Branded click-to-play overlay. Used for mode "off", and as the fallback
+     whenever the browser refuses to autoplay at all - otherwise the visitor
+     is left staring at a still frame with no obvious way to start it. */
+  function addPlayOverlay(trigger){
+    if (frame.querySelector('.play-overlay')) return;
     v.controls = false;
     const over = document.createElement('button');
     over.type = 'button';
@@ -1092,10 +1095,13 @@ function gateOnVideo(v){
       v.volume = 1;
       v.play().catch(() => { v.muted = true; v.play().catch(function(){}); });
       over.remove();
-      track('video_play', { trigger: 'click' });
+      const sc = frame.querySelector('.sound-cta');
+      if (sc && !v.muted) sc.classList.remove('show');
+      track('video_play', { trigger: trigger || 'click' });
     });
-    return;
   }
+
+  if (mode === 'off') { addPlayOverlay('click'); return; }
 
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -1122,11 +1128,19 @@ function gateOnVideo(v){
       v.play().then(() => {
         btn.classList.add('show');
         track('video_autoplay', { sound: false });
-      }).catch(() => { /* autoplay refused entirely; controls are there */ });
+      }).catch(() => {
+        /* Autoplay refused outright - give them the branded play button. */
+        btn.classList.remove('show');
+        addPlayOverlay('autoplay_blocked');
+        track('video_autoplay', { sound: false, blocked: true });
+      });
     });
   } else {
     v.muted = true;
-    v.play().then(() => btn.classList.add('show')).catch(function(){});
+    v.play().then(() => btn.classList.add('show')).catch(() => {
+      btn.classList.remove('show');
+      addPlayOverlay('autoplay_blocked');
+    });
   }
 })();
 
