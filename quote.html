@@ -25,9 +25,10 @@ window.FUNNEL_CONFIG = {
   onboardingUrl: "https://calendly.com/expandaccounts/onboarding-call",
   questionsUrl:  "https://calendly.com/expandaccounts/questions-call",
 
-  // Google Apps Script web app. Receives every completed form, whether or not
-  // they go on to book. Writes a row to the "Funnel Leads" sheet and emails you.
-  leadWebhook: "https://script.google.com/macros/s/AKfycbxexsJZ_7fjNQZgeqvNc5Be76G0Hl7h43Jzb0Y5hOB7xkioTvvQuGr8tfFJaux1BSJKNg/exec",
+  // Web3Forms. Receives every completed form, whether or not they go on to
+  // book, and emails it to hello@expandaccounts.co.uk. Free tier is 250 a month.
+  leadWebhook: "https://api.web3forms.com/submit",
+  web3formsKey: "2784549c-10f7-4a7e-b695-2d73fe1d3077",
 
   // LinkedIn conversion ID (Campaign Manager > Conversions). Fires on form submit.
   // Partner/Insight Tag id is 8370186 and sits at the bottom of this file.
@@ -1301,24 +1302,34 @@ form.addEventListener('submit', function(e){
   })();
 
   if (CFG.leadWebhook) {
-    const body = JSON.stringify(payload);
+    /* Web3Forms takes multipart form data. That matters: sendBeacon is only
+       allowed to send CORS-safelisted content types, so a JSON body would be
+       silently refused on page unload and the lead would vanish. */
+    const fd = new FormData();
+    fd.append('access_key', CFG.web3formsKey);
+    fd.append('subject', 'New lead: ' + (payload.name || 'no name') + ' (quote)');
+    fd.append('from_name', 'Expand Accounts funnel');
+    if (!payload.page) fd.append('page', 'quote');
+    Object.keys(payload).forEach(function (k) {
+      var v = payload[k];
+      fd.append(k, (v === null || v === undefined) ? '' : String(v));
+    });
+
     let sent = false;
 
     /* sendBeacon survives the page unloading, so the lead still lands even if
        they close the tab the instant they hit the button. */
     if (navigator.sendBeacon) {
       try {
-        sent = navigator.sendBeacon(CFG.leadWebhook, new Blob([body], { type: 'text/plain' }));
+        sent = navigator.sendBeacon(CFG.leadWebhook, fd);
       } catch (e) { sent = false; }
     }
 
     if (!sent) {
       fetch(CFG.leadWebhook, {
         method: 'POST',
-        mode: 'no-cors',
         keepalive: true,          // request completes even after we navigate away
-        headers: { 'Content-Type': 'text/plain' },
-        body: body
+        body: fd
       }).catch(function(){ /* never block the redirect */ });
     }
 
